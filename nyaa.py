@@ -23,7 +23,7 @@ class NyaaTorrent:
     @property
     def submitter(self):
         return self.soup.select_one(
-            "a[title='User']").text
+            ".panel-body > div:nth-child(2) > div:nth-child(2) > a").text
 
     @property
     def categories(self):
@@ -60,11 +60,11 @@ class NyaaTorrent:
 
     @property
     def torrent_file(self):
-        return 'https://nyaa.si' + self.soup.select_one('div.panel.panel-default').select('a')[-2]['href']
+        return 'https://nyaa.si' + self.soup.select_one("a[href*='/download/']")['href']
 
     @property
     def magnet(self):
-        return self.soup.select_one('div.panel.panel-default').select('a')[-1]['href']
+        return self.soup.select_one("a[href*='magnet:']")['href']
 
     @property
     def description(self):
@@ -76,7 +76,7 @@ class NyaaTorrent:
             'div.panel.panel-default.comment-panel')
         comments = [
             {
-                'UserObject': {
+                'User': {
                     'name': x.find('p').text.replace('(uploader)', '').strip(),
                     'link': 'https://nyaa.si' + x.find('p').a['href'],
                     'avatar': x.select_one('img.avatar')['src'],
@@ -96,6 +96,27 @@ class NyaaTorrent:
     def comments_count(self):
         return len(self.comments)
 
+    @property
+    def __dict__(self):
+        return {
+            "link": self.link,
+            "title": self.title,
+            "submitter": self.submitter,
+            "categories": self.categories,
+            "information": self.information,
+            "file_size": self.file_size,
+            "date_added": self.date_added,
+            "seeders": self.seeders,
+            "leechers": self.leechers,
+            "completed": self.completed,
+            "infohash": self.infohash,
+            "torrent_file": self.torrent_file,
+            "magnet": self.magnet,
+            "description": self.description,
+            "comments": self.comments,
+            "comments_count": self.comments_count,
+        }
+
 
 g = NyaaTorrent('https://nyaa.si/view/1328642')
-print(json.dumps(g.comments, indent=4))
+print(json.dumps(g.__dict__, indent=2))
